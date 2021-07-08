@@ -12,4 +12,6 @@ public interface BeanFactory {
      * @throws IllegalAccessException
      */
     Object getBean(String beanName) throws InstantiationException, IllegalAccessException;
+
+    Object getBean(String beanName, Object... args) throws Exception;
 }
