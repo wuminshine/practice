@@ -12,12 +12,19 @@ public class UserService {
     // 注入userDao
     private UserDao userDao;
 
+    private String userId;
+
     /**
      * 获取用户信息方法
      * @param userId
      * @return
      */
     public String getUser(String userId)
+    {
+        return  userDao.getUser(userId);
+    }
+
+    public String getUser()
     {
         return  userDao.getUser(userId);
     }
