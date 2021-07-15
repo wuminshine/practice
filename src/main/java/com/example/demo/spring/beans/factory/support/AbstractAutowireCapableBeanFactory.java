@@ -5,7 +5,9 @@ import com.example.demo.spring.beans.BeanReference;
 import com.example.demo.spring.beans.PropertyValue;
 import com.example.demo.spring.beans.PropertyValues;
 import com.example.demo.spring.beans.factory.BeanDefinition;
+import com.example.demo.spring.beans.factory.BeanPostProcessor;
 import com.example.demo.spring.beans.factory.InstantiationStrategy;
+import com.example.demo.spring.beans.factory.config.AutowireCapableBeanFactory;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
 /**
  * 定义创建bean的公共行为
  */
-public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory{
+public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory implements AutowireCapableBeanFactory {
 
     private InstantiationStrategy instantiationStrategy = new CglibInstantiationStrategy();
 
@@ -26,7 +28,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
      * @throws InstantiationException
      */
     @Override
-    Object createBean(String beanName, BeanDefinition beanDefinition) throws IllegalAccessException, InstantiationException {
+    Object createBean(String beanName, BeanDefinition beanDefinition) throws Exception {
         Object singletonInstance = getSingleton(beanName);
         if (singletonInstance != null)
         {
@@ -35,6 +37,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         Object instance = beanDefinition.getBeanClass().newInstance();
         // 填充bean的属性，这是一个递归的过程，不只有基本类型的属性，还有引用类型的属性
         applyPropertyValues(instance, beanDefinition);
+        // 执行bean的初始化方法和BeanPostProcessors前后方法
+        initializeBean(beanName, instance, beanDefinition);
         addSingleton(beanName, instance);
         return instance;
     }
@@ -52,12 +56,63 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
         // 填充bean的属性，这是一个递归的过程，不只有基本类型的属性，还有引用类型的属性
         applyPropertyValues(instance, beanDefinition);
+
+        // 执行bean的初始化方法和BeanPostProcessors前后方法
+        initializeBean(beanName, instance, beanDefinition);
+
         addSingleton(beanName, instance);
         return instance;
 
     }
 
-    public void applyPropertyValues(Object bean, BeanDefinition beanDefinition) throws IllegalAccessException, InstantiationException {
+    private Object initializeBean(String beanName, Object instance, BeanDefinition beanDefinition) {
+        // 执行BeanPostProcessor before处理
+        Object wrappedBean = applyBeanPostProcessorsBeforeInitialization(instance, beanName);
+
+        // 待完成内容
+        invokeInitMethods(beanName, wrappedBean, beanDefinition);
+
+        // 执行BeanPostProcessor after处理
+        wrappedBean = applyBeanPostProcessorsAfterInitialization(instance, beanName);
+        return wrappedBean;
+    }
+
+    private void invokeInitMethods(String beanName, Object wrappedBean, BeanDefinition beanDefinition) {
+    }
+
+    @Override
+    public Object applyBeanPostProcessorsBeforeInitialization(Object existBean, String beanName) {
+        Object result = existBean;
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+        for(BeanPostProcessor beanPostProcessor: beanPostProcessors)
+        {
+            Object current = beanPostProcessor.postProcessBeforeInitialization(result, beanName);
+            if (null == current)
+            {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    @Override
+    public Object applyBeanPostProcessorsAfterInitialization(Object existBean, String beanName) {
+        Object result = existBean;
+        List<BeanPostProcessor> beanPostProcessors = getBeanPostProcessors();
+        for(BeanPostProcessor beanPostProcessor: beanPostProcessors)
+        {
+            Object current = beanPostProcessor.postProcessAfterInitialization(result, beanName);
+            if (null == current)
+            {
+                return result;
+            }
+            result = current;
+        }
+        return result;
+    }
+
+    public void applyPropertyValues(Object bean, BeanDefinition beanDefinition) throws Exception {
         PropertyValues propertyValues = beanDefinition.getPropertyValues();
         if (null == propertyValues)
         {
