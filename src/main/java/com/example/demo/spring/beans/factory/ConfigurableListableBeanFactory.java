@@ -1,8 +1,9 @@
 package com.example.demo.spring.beans.factory;
 
 import com.example.demo.spring.beans.factory.config.AutowireCapableBeanFactory;
+import com.example.demo.spring.beans.factory.config.ConfigurableBeanFactory;
 
-public interface ConfigurableListableBeanFactory extends ListableBeanFactory, HierarchicalBeanFactory, AutowireCapableBeanFactory {
+public interface ConfigurableListableBeanFactory extends ListableBeanFactory, ConfigurableBeanFactory, AutowireCapableBeanFactory {
 
     BeanDefinition getBeanDefinition(String beanName) throws Exception;
 

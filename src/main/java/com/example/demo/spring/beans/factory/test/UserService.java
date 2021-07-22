@@ -1,9 +1,11 @@
 package com.example.demo.spring.beans.factory.test;
 
 
+import com.example.demo.spring.beans.factory.DisposableBean;
+import com.example.demo.spring.beans.factory.InitializingBean;
 import com.example.demo.spring.context.support.ClassPathXmlApplicationContext;
 
-public class UserService {
+public class UserService implements InitializingBean, DisposableBean {
 
     // 注入userDao
     private UserDao userDao;
@@ -85,7 +87,7 @@ public class UserService {
 
         // 1.初始化 BeanFactory
         ClassPathXmlApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:spring.xml");
-
+        applicationContext.registerShutDownHook();
         // 2. 获取Bean对象调用方法
         UserService userService = applicationContext.getBean("userService", UserService.class);
         String result = userService.getUser();
@@ -93,4 +95,13 @@ public class UserService {
         System.out.println("userService：" + userService);
     }
 
+    @Override
+    public void destory() throws Exception {
+        System.out.println("执行userservice销毁方法");
+    }
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println("执行userservice初始化方法");
+    }
 }
