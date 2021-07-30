@@ -3,6 +3,7 @@ package com.example.demo.spring.beans.factory.support;
 import com.example.demo.spring.beans.factory.BeanDefinition;
 import com.example.demo.spring.beans.factory.DisposableBean;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 
@@ -34,11 +35,15 @@ public class DisposableBeanAdapter implements DisposableBean {
         }
 
         // 配置了销毁的方法
-        Method method = bean.getClass().getMethod(destoryMethodName);
-        if (null == method)
+        if (StringUtils.isNotEmpty(destoryMethodName))
         {
-            log.error("未找到指定的销毁方法");
+            Method method = bean.getClass().getMethod(destoryMethodName);
+            if (null == method)
+            {
+                log.error("未找到指定的销毁方法");
+            }
+            method.invoke(bean);
         }
-        method.invoke(bean);
+
     }
 }

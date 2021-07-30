@@ -61,6 +61,7 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
                 disposableBean.destory();
             } catch (Exception e) {
                 log.error("执行销毁方法报错");
+                e.printStackTrace();
             }
         }
     }
